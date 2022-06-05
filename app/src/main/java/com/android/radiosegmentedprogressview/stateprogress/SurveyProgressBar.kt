@@ -8,8 +8,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.android.radiosegmentedprogressview.R
-import com.android.radiosegmentedprogressview.stateprogress.components.FontManager
-import com.android.radiosegmentedprogressview.stateprogress.components.StateItem
 import kotlin.collections.ArrayList
 
 class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : View(
@@ -29,11 +27,12 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
     private fun initClass(context: Context, attrs: AttributeSet, defStyle: Int) {
         initParams()
 
-        mStateDescriptionSize = convertSpToPixel(mStateDescriptionSize)
+        mStateTextValueSize = convertSpToPixel(mStateTextValueSize)
+        mStateSubtextSize = convertSpToPixel(mStateSubtextSize)
         mStateLineThickness = convertDpToPixel(mStateLineThickness)
         mSpacing = convertDpToPixel(mSpacing)
-        mCheckFont = FontManager().getTypeface(context)
         mDefaultTypefaceBold = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        mDefaultTypefaceNormal = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
         if (attrs != null) {
             val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, defStyle, 0)
@@ -43,25 +42,18 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
             mForegroundColor =
                 a.getColor(R.styleable.StateProgressBar_spb_stateForegroundColor, mForegroundColor)
 
-            mStateDescriptionColor = a.getColor(
-                R.styleable.StateProgressBar_spb_stateDescriptionColor,
-                mStateDescriptionColor
-            )
-
-            mCurrentStateNumber = a.getInteger(
-                R.styleable.StateProgressBar_spb_currentStateNumber,
-                mCurrentStateNumber
-            )
-            mMaxStateNumber =
-                a.getInteger(R.styleable.StateProgressBar_spb_maxStateNumber, mMaxStateNumber)
-
             mStateSize = a.getDimension(R.styleable.StateProgressBar_spb_stateSize, mStateSize)
-            mStateNumberTextSize =
-                a.getDimension(R.styleable.StateProgressBar_spb_stateTextSize, mStateNumberTextSize)
-            mStateDescriptionSize = a.getDimension(
+
+            mStateTextValueSize = a.getDimension(
                 R.styleable.StateProgressBar_spb_stateDescriptionSize,
-                mStateDescriptionSize
+                mStateTextValueSize
             )
+
+            mStateSubtextSize = a.getDimension(
+                R.styleable.StateProgressBar_spb_stateDescriptionSize,
+                mStateSubtextSize
+            )
+
             mStateLineThickness = a.getDimension(
                 R.styleable.StateProgressBar_spb_stateLineThickness,
                 mStateLineThickness
@@ -71,32 +63,10 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
                 R.styleable.StateProgressBar_spb_checkStateCompleted,
                 mCheckStateCompleted
             )
-            mAnimateToCurrentProgressState = a.getBoolean(
-                R.styleable.StateProgressBar_spb_animateToCurrentProgressState,
-                mAnimateToCurrentProgressState
-            )
+
             mEnableAllStatesCompleted = a.getBoolean(
                 R.styleable.StateProgressBar_spb_enableAllStatesCompleted,
                 mEnableAllStatesCompleted
-            )
-
-            mDescTopSpaceDecrementer = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionTopSpaceDecrementer,
-                mDescTopSpaceDecrementer
-            )
-            mDescTopSpaceIncrementer = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionTopSpaceIncrementer,
-                mDescTopSpaceIncrementer
-            )
-
-            mAnimDuration =
-                a.getInteger(R.styleable.StateProgressBar_spb_animationDuration, mAnimDuration)
-            mAnimStartDelay =
-                a.getInteger(R.styleable.StateProgressBar_spb_animationStartDelay, mAnimStartDelay)
-
-            mIsStateNumberDescending = a.getBoolean(
-                R.styleable.StateProgressBar_spb_stateNumberIsDescending,
-                mIsStateNumberDescending
             )
 
             mMaxDescriptionLine = a.getInteger(
@@ -109,16 +79,8 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
                 mDescriptionLinesSpacing
             )
 
-            mJustifyMultilineDescription = a.getBoolean(
-                R.styleable.StateProgressBar_spb_justifyMultilineDescription,
-                mJustifyMultilineDescription
-            )
-
-            resolveStateSize()
             validateLineThickness(mStateLineThickness)
             validateStateNumber(mCurrentStateNumber)
-
-            mStateRadius = mStateSize / 2
 
             a.recycle()
         }
@@ -128,34 +90,21 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         mBackgroundColor = ContextCompat.getColor(context, R.color.background_color)
         mForegroundColor = ContextCompat.getColor(context, R.color.foreground_color)
 
-        mStateDescriptionColor = ContextCompat.getColor(context, R.color.background_text_color)
+        mStateTextValueColor = ContextCompat.getColor(context, R.color.background_text_color)
+        mStateSubtextColor = ContextCompat.getColor(context, R.color.black)
 
-        mStateSize = 0.0f
         mStateSize = 0.0f
         mStateLineThickness = 4.0f
-        mStateNumberTextSize = 0.0f
-        mStateDescriptionSize = 15f
-
+        mStateTextValueSize = 12f
+        mStateSubtextSize = 15f
         mMaxStateNumber = 5
-
-        mCurrentStateNumber = 1
-
+        mCurrentStateNumber = 0
         mSpacing = 4.0f
-
         mDescTopSpaceDecrementer = 0.0f
         mDescTopSpaceIncrementer = 0.0f
-
         mDescriptionLinesSpacing = 0.0f
-
         mCheckStateCompleted = false
-        mAnimateToCurrentProgressState = false
         mEnableAllStatesCompleted = false
-
-        mAnimStartDelay = 100
-        mAnimDuration = 4000
-
-        mIsStateNumberDescending = false
-
         mJustifyMultilineDescription = false
     }
 
@@ -163,34 +112,12 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         mBackgroundPaint = setPaintAttributes(mStateLineThickness, mBackgroundColor)
         mForegroundPaint = setPaintAttributes(mStateLineThickness, mForegroundColor)
 
-        mStateDescriptionPaint = (mCustomStateDescriptionTypeface ?: mDefaultTypefaceBold)?.let {
-            setPaintAttributes(
-                mStateDescriptionSize, mStateDescriptionColor,
-                it
-            )
-        }
-    }
-
-    fun setStateNumberTypeface(pathToFont: String) {
-        mCustomStateNumberTypeface = FontManager().getTypeface(context, pathToFont)
-        invalidate()
-    }
-
-    fun getStateNumberTypeface(): Typeface? {
-        return mCustomStateNumberTypeface
-    }
-
-    fun setStateDescriptionTypeface(pathToFont: String) {
-        mCustomStateDescriptionTypeface = FontManager().getTypeface(context, pathToFont)
-        mStateDescriptionPaint!!.typeface =
-            if (mCustomStateDescriptionTypeface != null) mCustomStateDescriptionTypeface else mDefaultTypefaceBold
-        /*mCurrentStateDescriptionPaint!!.typeface =
-            if (mCustomStateDescriptionTypeface != null) mCustomStateDescriptionTypeface else mDefaultTypefaceBold*/
-        invalidate()
-    }
-
-    fun getStateDescriptionTypeface(pathToFont: String?): Typeface? {
-        return mCustomStateDescriptionTypeface
+        mStateTextValuePaint = setPaintAttributes(
+            mStateTextValueSize, mStateTextValueColor, mDefaultTypefaceBold!!
+        )
+        mStateSubtextPaint = setPaintAttributes(
+            mStateSubtextSize, mStateSubtextColor, mDefaultTypefaceNormal!!
+        )
     }
 
     private fun validateLineThickness(lineThickness: Float) {
@@ -200,30 +127,16 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         }
     }
 
-    private fun validateStateSize() {
-        if (mStateSize <= mStateNumberTextSize) {
-            mStateSize = mStateNumberTextSize + mStateNumberTextSize / 2
-        }
-    }
-
     override fun setBackgroundColor(backgroundColor: Int) {
         mBackgroundColor = backgroundColor
         mBackgroundPaint!!.color = mBackgroundColor
         invalidate()
     }
 
-    fun getBackgroundColor(): Int {
-        return mBackgroundColor
-    }
-
     fun setForegroundColor(foregroundColor: Int) {
         mForegroundColor = foregroundColor
         mForegroundPaint!!.color = mForegroundColor
         invalidate()
-    }
-
-    fun getForegroundColor(): Int {
-        return mForegroundColor
     }
 
     fun setStateLineThickness(stateLineThickness: Float) {
@@ -238,35 +151,28 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         invalidate()
     }
 
-    fun getStateLineThickness(): Float {
-        return mStateLineThickness
-    }
-
-    fun setStateNumberBackgroundColor(stateNumberBackgroundColor: Int) {
-        /*mStateNumberBackgroundColor = stateNumberBackgroundColor
-        mStateNumberBackgroundPaint!!.color = mStateNumberBackgroundColor*/
+    fun setStateTextValueColor(stateTextValueColor: Int) {
+        mStateTextValueColor = stateTextValueColor
+        mStateTextValuePaint!!.color = mStateTextValueColor
         invalidate()
     }
 
-    fun setStateDescriptionColor(stateDescriptionColor: Int) {
-        mStateDescriptionColor = stateDescriptionColor
-        mStateDescriptionPaint!!.color = mStateDescriptionColor
+
+    fun setStateSubtextColor(color: Int) {
+        mStateSubtextColor = color
+        mStateSubtextPaint!!.color = mStateSubtextColor
         invalidate()
     }
 
-    fun getStateDescriptionColor(): Int {
-        return mStateDescriptionColor
-    }
 
     fun setCurrentStateNumber(currentStateNumber: Int) {
-        if (currentStateNumber < 1 || currentStateNumber > mMaxStateNumber) return
+        if (currentStateNumber < 0 || currentStateNumber > mMaxStateNumber) {
+            mCurrentStateNumber = 0
+            return
+        }
         mCurrentStateNumber = currentStateNumber
         updateCheckAllStatesValues(mEnableAllStatesCompleted)
         invalidate()
-    }
-
-    fun getCurrentStateNumber(): Int {
-        return mCurrentStateNumber
     }
 
     fun setMaxStateNumber(maximumState: Int) {
@@ -280,48 +186,42 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         invalidate()
     }
 
-    fun getMaxStateNumber(): Int {
-        return mMaxStateNumber
-    }
-
     fun setStateSize(stateSize: Float) {
         mStateSize = convertDpToPixel(stateSize)
         resetStateSizeValues()
     }
 
     private fun resetStateSizeValues() {
-        resolveStateSize()
-        mStateRadius = mStateSize / 2
         validateLineThickness(mStateLineThickness)
         mBackgroundPaint!!.strokeWidth = mStateLineThickness
         mForegroundPaint!!.strokeWidth = mStateLineThickness
         requestLayout()
     }
 
-    fun setStateDescriptionSize(stateDescriptionSize: Float) {
-        mStateDescriptionSize = convertSpToPixel(stateDescriptionSize)
+    fun setStateTextValueSize(stateDescriptionSize: Float) {
+        mStateTextValueSize = convertSpToPixel(stateDescriptionSize)
         resolveStateDescriptionSize()
     }
 
+    fun setStateSubtextSize(stateValueSize: Float) {
+        mStateSubtextSize = convertSpToPixel(stateValueSize)
+        resolveSubtextSize()
+    }
+
     private fun resolveStateDescriptionSize() {
-        mStateDescriptionPaint!!.textSize = mStateDescriptionSize
+        mStateTextValuePaint!!.textSize = mStateTextValueSize
         requestLayout()
     }
 
-    fun getStateDescriptionSize(): Float {
-        return mStateDescriptionSize
-    }
-
-
-    fun getStateNumberTextSize(): Float {
-        return mStateNumberTextSize
+    private fun resolveSubtextSize() {
+        mStateSubtextPaint!!.textSize = mStateSubtextSize
+        requestLayout()
     }
 
     fun checkStateCompleted(checkStateCompleted: Boolean) {
         mCheckStateCompleted = checkStateCompleted
         invalidate()
     }
-
 
     fun setAllStatesCompleted(enableAllStatesCompleted: Boolean) {
         mEnableAllStatesCompleted = enableAllStatesCompleted
@@ -333,8 +233,6 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         if (enableAllStatesCompleted) {
             mCheckStateCompleted = true
             mCurrentStateNumber = mMaxStateNumber
-        } else {
-            mStateDescriptionPaint!!.color = mStateDescriptionPaint!!.color
         }
     }
 
@@ -352,30 +250,9 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         requestLayout()
     }
 
-    fun getDescriptionTopSpaceDecrementer(): Float {
-        return mDescTopSpaceDecrementer
-    }
-
-    fun getDescriptionTopSpaceIncrementer(): Float {
-        return mDescTopSpaceIncrementer
-    }
-
-    fun getDescriptionLinesSpacing(): Float {
-        return mDescriptionLinesSpacing
-    }
-
     fun setDescriptionLinesSpacing(descriptionLinesSpacing: Float) {
         mDescriptionLinesSpacing = descriptionLinesSpacing
         requestLayout()
-    }
-
-    fun setStateNumberIsDescending(stateNumberIsDescending: Boolean) {
-        mIsStateNumberDescending = stateNumberIsDescending
-        invalidate()
-    }
-
-    fun getStateNumberIsDescending(): Boolean {
-        return mIsStateNumberDescending
     }
 
     fun isDescriptionMultiline(): Boolean {
@@ -418,21 +295,8 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
     }
 
     private fun resolveStateSize() {
-        resolveStateSize(mStateSize != 0f, mStateNumberTextSize != 0f)
-    }
-
-    private fun resolveStateSize(isStateSizeSet: Boolean, isStateTextSizeSet: Boolean) {
-        if (!isStateSizeSet && !isStateTextSizeSet) {
-            mStateSize =
-                convertDpToPixel(DEFAULT_STATE_SIZE)
-            mStateNumberTextSize =
-                convertSpToPixel(DEFAULT_TEXT_SIZE)
-        } else if (isStateSizeSet && isStateTextSizeSet) {
-            validateStateSize()
-        } else if (!isStateSizeSet) {
-            mStateSize = mStateNumberTextSize + mStateNumberTextSize / 2
-        } else {
-            mStateNumberTextSize = mStateSize - mStateSize * 0.375f
+        if (mStateSize != 0f) {
+            mStateSize = convertDpToPixel(DEFAULT_STATE_SIZE)
         }
     }
 
@@ -471,13 +335,21 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
 
     private fun getDesiredHeight(): Int {
         return if (mStateDescriptionData.isEmpty()) {
-            (2 * mStateRadius).toInt() + mSpacing.toInt()
+            getCellHeight()
         } else {
-            if (checkForDescriptionMultiLine(mStateDescriptionData)) {
-                (2 * mStateRadius).toInt() + (selectMaxDescriptionLine(mMaxDescriptionLine) * (1.3 * mStateDescriptionSize)).toInt() + mSpacing.toInt() - mDescTopSpaceDecrementer.toInt() + mDescTopSpaceIncrementer.toInt() + mDescriptionLinesSpacing.toInt()
-            } else {
-                (2 * mStateRadius).toInt() + (1.3 * mStateDescriptionSize).toInt() + mSpacing.toInt() - mDescTopSpaceDecrementer.toInt() + mDescTopSpaceIncrementer.toInt()
-            }
+            getHeightCalculatedVal()
+        }
+    }
+
+    private fun getHeightCalculatedVal(): Int {
+        val radius = (2 * mStateRadius).toInt()
+        val descCalculation = mDescTopSpaceIncrementer.toInt() - mDescTopSpaceDecrementer.toInt()
+        return if (checkForDescriptionMultiLine(mStateDescriptionData)) {
+            val descHeight =
+                (selectMaxDescriptionLine(mMaxDescriptionLine) * (1.3 * mStateTextValueSize)).toInt()
+            radius + descHeight + mSpacing.toInt() + descCalculation + mDescriptionLinesSpacing.toInt()
+        } else {
+            radius + (1.3 * mStateTextValueSize).toInt() + mSpacing.toInt() + descCalculation
         }
     }
 
@@ -515,6 +387,9 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         return if (maxLine > 1) maxLine else getMaxDescriptionLine(mStateDescriptionData)
     }
 
+    /**
+     * Draw subway progress bar
+     * */
     private fun drawState(canvas: Canvas) {
         drawCurrentStateJoiningLine(canvas)
         drawBackgroundLines(canvas)
@@ -525,33 +400,51 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         drawStateDescriptionText(canvas)
     }
 
+    /**
+     * Draw subway progress bar subway-points
+     * */
     private fun drawBackgroundCircles(canvas: Canvas) {
-        val startIndex = if (mIsStateNumberDescending) 0 else mCurrentStateNumber
-        val endIndex =
-            if (mIsStateNumberDescending) mMaxStateNumber - mCurrentStateNumber else mMaxStateNumber
-        drawCircles(canvas, mBackgroundPaint!!, startIndex, endIndex)
+        mBackgroundPaint?.style = Paint.Style.STROKE
+        drawCircles(canvas, mBackgroundPaint!!, mCurrentStateNumber, mMaxStateNumber)
     }
 
+    /**
+     * Draw selected subway-points on subway progress bar
+     * */
     private fun drawForegroundCircles(canvas: Canvas) {
-        val startIndex = if (mIsStateNumberDescending) mMaxStateNumber - mCurrentStateNumber else 0
-        val endIndex = if (mIsStateNumberDescending) mMaxStateNumber else mCurrentStateNumber
-        drawCircles(canvas, mForegroundPaint!!, startIndex, endIndex)
+        drawCircles(canvas, mForegroundPaint!!, 0, mCurrentStateNumber)
     }
 
+    /**
+     * Draw lines from one point to another when there is no progress
+     * with remaining un-selected states in iterations
+     * */
     private fun drawBackgroundLines(canvas: Canvas) {
-        val startIndex = if (mIsStateNumberDescending) 0 else mCurrentStateNumber - 1
-        val endIndex =
-            if (mIsStateNumberDescending) mMaxStateNumber - mCurrentStateNumber + 1 else mMaxStateNumber
-        drawLines(canvas, mBackgroundPaint!!, startIndex, endIndex)
+        val iterations = if (mCurrentStateNumber != 0) {
+            (mMaxStateNumber - mCurrentStateNumber) + 1
+        } else {
+            mMaxStateNumber - mCurrentStateNumber
+        }
+
+        var si = if (mCurrentStateNumber - 1 < 0) 0 else mCurrentStateNumber - 1
+        var ei = if (mCurrentStateNumber == 0) mCurrentStateNumber + 2 else mCurrentStateNumber + 1
+        for (i in 0 until iterations - 1) {
+            si = if (i != 0) si + 1 else si
+            ei = if (i != 0 && ei + 1 <= mMaxStateNumber) ei + 1 else ei
+            drawLines(canvas, mBackgroundPaint!!, si, ei)
+        }
     }
 
+    /**
+     * draw lines for selected progress states
+     * */
     private fun drawForegroundLines(canvas: Canvas) {
-        val startIndex =
-            if (mIsStateNumberDescending) mMaxStateNumber - mCurrentStateNumber + 1 else 0
-        val endIndex = if (mIsStateNumberDescending) mMaxStateNumber else mCurrentStateNumber
-        drawLines(canvas, mForegroundPaint!!, startIndex, endIndex)
+        drawLines(canvas, mForegroundPaint!!, 0, mCurrentStateNumber)
     }
 
+    /**
+     * Drawing lines from point A to Point B in subway depending on the inputs
+     * */
     private fun drawLines(canvas: Canvas, paint: Paint, startIndex: Int, endIndex: Int) {
         val startCenterX: Float
         val endCenterX: Float
@@ -570,7 +463,6 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         drawLineToCurrentState(canvas)
     }
 
-
     private fun drawLineToCurrentState(canvas: Canvas) {
         canvas.drawLine(
             mStartCenterX, mCellHeight / 2, mEndCenterX, mCellHeight / 2,
@@ -579,117 +471,163 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         mNextCellWidth = mCellWidth
     }
 
+    /**
+     * Shows/Draws sub-text on canvas
+     * */
     private fun drawStateDescriptionText(canvas: Canvas) {
-        var xPos: Int
-        var yPos: Int
-        var innerPaintType: Paint
         if (!mStateDescriptionData.isEmpty()) {
             for (i in mStateDescriptionData.indices) {
-                if (i < mMaxStateNumber) {
-                    innerPaintType = selectDescriptionPaint(mCurrentStateNumber, i)
-                    xPos = (mNextCellWidth - mCellWidth / 2).toInt()
-                    if (mIsDescriptionMultiline && mMaxDescriptionLine > 1) {
-                        val stateDescription =
-                            if (mIsStateNumberDescending) mStateDescriptionData[mStateDescriptionData.size - 1 - i] else mStateDescriptionData[i]
-                        var nextLineCounter = 0
-                        var newXPos = 0
-                        val stateDescriptionLines: Array<String> =
-                            stateDescription.split(STATE_DESCRIPTION_LINE_SEPARATOR)
-                                .toTypedArray()
-                        for (line in stateDescriptionLines) {
-                            nextLineCounter = nextLineCounter + 1
-                            if (mJustifyMultilineDescription && nextLineCounter > 1) {
-                                newXPos = getNewXPosForDescriptionMultilineJustification(
-                                    stateDescriptionLines[0], line, innerPaintType, xPos
-                                )
-                            }
-                            if (nextLineCounter <= mMaxDescriptionLine) {
-                                var rNumberVal = 0.0f
-                                if (nextLineCounter > 1) {
-                                    rNumberVal = mDescriptionLinesSpacing * (nextLineCounter - 1)
-                                }
-                                yPos =
-                                    ((mCellHeight + nextLineCounter * mStateDescriptionSize - mSpacing - mDescTopSpaceDecrementer + 16f + rNumberVal).toInt())//mSpacing = mStateNumberForegroundPaint.getTextSize()
-                                canvas.drawText(
-                                    line,
-                                    (if (newXPos == 0) xPos else newXPos.toFloat()) as Float,
-                                    yPos.toFloat(),
-                                    innerPaintType
-                                )
-                            }
-                        }
-                    } else {
-                        yPos =
-                            (mCellHeight + mStateDescriptionSize - mSpacing - mDescTopSpaceDecrementer + 16f).toInt() //mSpacing = mStateNumberForegroundPaint.getTextSize()
-                        canvas.drawText(
-                            if (mIsStateNumberDescending) mStateDescriptionData[mStateDescriptionData.size - 1 - i] else mStateDescriptionData[i],
-                            xPos.toFloat(),
-                            yPos.toFloat(),
-                            innerPaintType
-                        )
-                    }
-                    mNextCellWidth += mCellWidth
-                }
+                drawTextViewOnCanvas(
+                    canvas,
+                    i,
+                    mStateTextValuePaint!!,
+                    mStateDescriptionData[i],
+                    60f,
+                    mStateTextValueSize
+                )
             }
         }
         mNextCellWidth = mCellWidth
     }
 
+    /**
+     * Shows/Draws main text on canvas
+     * */
     private fun drawStateTextAmt(canvas: Canvas) {
-        var xPos: Int
-        var yPos: Int
-        var innerPaintType: Paint
         if (!mStateTextAData.isEmpty()) {
             for (i in mStateTextAData.indices) {
-                if (i < mMaxStateNumber) {
-                    innerPaintType = selectDescriptionPaint(mCurrentStateNumber, i)
-                    xPos = (mNextCellWidth - mCellWidth / 2).toInt()
-                    if (mIsDescriptionMultiline && mMaxDescriptionLine > 1) {
-                        val stateDescription = mStateTextAData[i]
-                        var nextLineCounter = 0
-                        var newXPos = 0
-                        val stateDescriptionLines: Array<String> =
-                            stateDescription.split(STATE_DESCRIPTION_LINE_SEPARATOR)
-                                .toTypedArray()
-                        for (line in stateDescriptionLines) {
-                            nextLineCounter += 1
-                            if (mJustifyMultilineDescription && nextLineCounter > 1) {
-                                newXPos = getNewXPosForDescriptionMultilineJustification(
-                                    stateDescriptionLines[0], line, innerPaintType, xPos
-                                )
-                            }
-                            if (nextLineCounter <= mMaxDescriptionLine) {
-                                var rNumberVal = 0.0f
-                                if (nextLineCounter > 1) {
-                                    rNumberVal = mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
-                                }
-                                yPos =
-                                    ((mCellHeight + nextLineCounter * mStateDescriptionSize - mSpacing - mDescTopSpaceDecrementer + mDescTopSpaceIncrementer + rNumberVal).toInt())
-                                canvas.drawText(
-                                    line,
-                                    (if (newXPos == 0) xPos else newXPos.toFloat()) as Float,
-                                    yPos.toFloat(),
-                                    innerPaintType
-                                )
-                            }
-                        }
-                    } else {
-                        yPos =
-                            (mCellHeight + mStateDescriptionSize - mSpacing - mDescTopSpaceDecrementer + mDescTopSpaceIncrementer).toInt()
-                        canvas.drawText(
-                            mStateTextAData[i],
-                            xPos.toFloat(),
-                            yPos.toFloat(),
-                            innerPaintType
-                        )
-                    }
-                    mNextCellWidth += mCellWidth
-                }
+                drawTextViewOnCanvas(
+                    canvas,
+                    i,
+                    mStateSubtextPaint!!,
+                    mStateTextAData[i],
+                    0f,
+                    mStateSubtextSize
+                )
             }
         }
         mNextCellWidth = mCellWidth
     }
 
+    /**
+     * This common method to draw text on canvas for main text and subtext
+     * All calculations related to Positions X & Y on screens is calculated
+     * */
+    private fun drawTextViewOnCanvas(
+        canvas: Canvas,
+        i: Int,
+        textColor: Paint,
+        text: String,
+        mDescTopSpaceDecrementer: Float,
+        textSize: Float
+    ) {
+        val xPos: Int
+        var yPos: Int
+        val relativePosition =
+            (mCellHeight + textSize - mSpacing - mDescTopSpaceDecrementer + mDescTopSpaceIncrementer).toInt()
+
+        if (i < mMaxStateNumber) {
+            xPos = (mNextCellWidth - mCellWidth / 2).toInt()
+
+            if (mIsDescriptionMultiline && mMaxDescriptionLine > 1) {
+
+                var nextLineCounter = 0
+                val stateDescriptionLines: Array<String> =
+                    text.split(STATE_DESCRIPTION_LINE_SEPARATOR)
+                        .toTypedArray()
+
+                for (line in stateDescriptionLines) {
+                    nextLineCounter += 1
+
+                    val newXPos = getXPosition(
+                        nextLineCounter, stateDescriptionLines[0],
+                        line,
+                        textColor,
+                        xPos
+                    )
+
+                    if (nextLineCounter <= mMaxDescriptionLine) {
+                        var rNumberVal = 0.0f
+                        if (nextLineCounter > 1) {
+                            rNumberVal = mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
+                        }
+                        yPos = ((mCellHeight
+                                + nextLineCounter
+                                * textSize
+                                - mSpacing
+                                - mDescTopSpaceDecrementer
+                                + mDescTopSpaceIncrementer
+                                + rNumberVal
+                                ).toInt())
+
+
+                        val xPosition = (if (newXPos == 0) xPos else newXPos.toFloat()) as Float
+                        drawTextOnCanvas(
+                            canvas,
+                            line,
+                            xPosition,
+                            yPos.toFloat(),
+                            textColor
+                        )
+                    }
+                }
+            } else {
+                drawTextOnCanvas(
+                    canvas, text,
+                    xPos.toFloat(),
+                    relativePosition.toFloat(),
+                    textColor
+                )
+            }
+            mNextCellWidth += mCellWidth
+        }
+    }
+
+    /**
+     * Plain simple call to draw text on screen
+     * */
+    private fun drawTextOnCanvas(
+        canvas: Canvas,
+        text: String,
+        xPos: Float,
+        yPos: Float,
+        textColor: Paint
+    ) {
+        canvas.drawText(
+            text,
+            xPos,
+            yPos,
+            textColor
+        )
+    }
+
+    /**
+     * This generic method for this class to :
+     * Get x-axis position where text has to be drawn
+     * This is calculated based on the input for main text or sub-text
+     * */
+    private fun getXPosition(
+        counter: Int,
+        descLine: String,
+        line: String,
+        textColor: Paint,
+        pos: Int
+    ): Int {
+        if (mJustifyMultilineDescription && counter > 1) {
+            return getNewXPosForDescriptionMultilineJustification(
+                descLine,
+                line,
+                textColor,
+                pos
+            )
+        }
+        return 0
+    }
+
+    /**
+     * If description here such as main-text or sub-text has multiple lines
+     * then we can calculate here
+     * */
     private fun getNewXPosForDescriptionMultilineJustification(
         firstLine: String,
         nextLine: String,
@@ -712,77 +650,104 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         return Math.round(newXPos)
     }
 
-    private fun selectDescriptionPaint(currentState: Int, statePosition: Int): Paint {
-        var currentState = currentState
-        currentState =
-            if (mIsStateNumberDescending) mMaxStateNumber + 1 - currentState else currentState
-        return if (statePosition + 1 == currentState) {
-            mStateDescriptionPaint!!
-        } else {
-            mStateDescriptionPaint!!
-        }
-    }
-
-
+    /**
+     * List of data that has to shown on subway progress as Main-Text
+     * */
     fun setStateTextRowOneData(stateTextOneData: List<String?>) {
-        mStateTextAData = stateTextOneData as ArrayList<String>
+        mStateTextAData = stateTextOneData as List<String>
         requestLayout()
     }
 
+    /**
+     * List of data that has to shown on subway progress as Sub-Text
+     * */
     fun setStateDescriptionData(stateDescriptionData: List<String>) {
         mStateDescriptionData = stateDescriptionData as ArrayList<String>
         requestLayout()
     }
 
+    /**
+     * Convert dp to pixels - For Subway Progress
+     * */
     private fun convertDpToPixel(dp: Float): Float {
         val scale = resources.displayMetrics.density
         return dp * scale
     }
 
+    /**
+     * Convert sp to pixels - For text
+     * */
     private fun convertSpToPixel(sp: Float): Float {
         val scale = resources.displayMetrics.scaledDensity
         return sp * scale
     }
 
     private companion object {
-        private var mStateDescriptionData = arrayListOf<String>()
-        private var mStateTextAData = arrayListOf<String>()
-
-        private var mStateRadius = 0f
-        private var mStateSize = 0f
-        private var mStateLineThickness = 0f
-        private var mStateNumberTextSize = 0f
-        private var mStateDescriptionSize = 0f
+        private var mStateDescriptionData: List<String> = arrayListOf()
+        private var mStateTextAData: List<String> = arrayListOf()
 
         /**
-         * width of one cell = stageWidth/noOfStates
-         */
-        private var mCellWidth = 0f
+         * Subway point(circle) size defined as default value
+         * */
+        private var mStateRadius = 26.0f
 
-        private var mCellHeight = 0f
+        /**
+         * Subway point(circle) size
+         * */
+        private var mStateSize = 0.0f
+
+        /**
+         * Define each line thickness from Point-Point
+         * */
+        private var mStateLineThickness = 3.3f
+
+        /**
+         * Defines Main-Text text size
+         * */
+        private var mStateSubtextSize = 0.0f
+
+        /**
+         * Defines Sub-Text text size
+         * */
+        private var mStateTextValueSize = 0.0f
+
+        /**
+         * Cell width
+         */
+        private var mCellWidth = 0.0f
+
+        /**
+         * Cell height
+         */
+        private var mCellHeight = 0.0f
 
         /**
          * next cell(state) from previous cell
          */
-        private var mNextCellWidth = 0f
+        private var mNextCellWidth = 0.0f
 
         /**
          * center of first cell(state)
          */
-        private var mStartCenterX = 0f
+        private var mStartCenterX = 0.0f
 
         /**
          * center of last cell(state)
          */
-        private var mEndCenterX = 0f
+        private var mEndCenterX = 0.0f
 
+        /**
+         * Maximum number of subway points
+         * */
         private var mMaxStateNumber = 0
+
+        /**
+         * Current state-selected subway point
+         * */
         private var mCurrentStateNumber = 0
 
-        private var mAnimStartDelay = 0
-        private var mAnimDuration = 0
 
-        private var mSpacing = 0f
+        private var mSpacing = 0.0f
 
         private var mDescTopSpaceDecrementer = 0f
         private var mDescTopSpaceIncrementer = 0f
@@ -795,26 +760,22 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
          */
         private var mBackgroundPaint: Paint? = null
         private var mForegroundPaint: Paint? = null
-        private var mStateDescriptionPaint: Paint? = null
+        private var mStateTextValuePaint: Paint? = null
+        private var mStateSubtextPaint: Paint? = null
 
         private var mBackgroundColor = 0
         private var mForegroundColor = 0
-        private var mStateDescriptionColor = 0
+        private var mStateTextValueColor = 0
+        private var mStateSubtextColor = 0
 
-        private var mIsStateNumberDescending = false
-
-        private var mCustomStateNumberTypeface: Typeface? = null
-        private var mCustomStateDescriptionTypeface: Typeface? = null
         private var mDefaultTypefaceBold: Typeface? = null
+        private var mDefaultTypefaceNormal: Typeface? = null
         private var mIsDescriptionMultiline = false
         private var mMaxDescriptionLine = 0
-        private var mDescriptionLinesSpacing = 0f
+        private var mDescriptionLinesSpacing = 0.0f
         private var STATE_DESCRIPTION_LINE_SEPARATOR = "\n"
         private var mJustifyMultilineDescription = false
-        private var mAnimateToCurrentProgressState = false
         private var mEnableAllStatesCompleted = false
         private var mCheckStateCompleted = false
-        private var mCheckFont: Typeface? = null
-
     }
 }

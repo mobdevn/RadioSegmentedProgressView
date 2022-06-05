@@ -34,109 +34,100 @@ class StateProgressView(context: Context, attrs: AttributeSet, defStyle: Int) : 
         mCheckFont = FontManager().getTypeface(context)
         mDefaultTypefaceBold = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
 
-        if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, defStyle, 0)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, defStyle, 0)
 
-            mBackgroundColor =
-                a.getColor(R.styleable.StateProgressBar_spb_stateBackgroundColor, mBackgroundColor)
-            mForegroundColor =
-                a.getColor(R.styleable.StateProgressBar_spb_stateForegroundColor, mForegroundColor)
-            /*mStateNumberBackgroundColor = a.getColor(
-                R.styleable.StateProgressBar_spb_stateNumberBackgroundColor,
-                mStateNumberBackgroundColor
-            )
-            mStateNumberForegroundColor = a.getColor(
-                R.styleable.StateProgressBar_spb_stateNumberForegroundColor,
-                mStateNumberForegroundColor
-            )
-            mCurrentStateDescriptionColor = a.getColor(
-                R.styleable.StateProgressBar_spb_currentStateDescriptionColor,
-                mCurrentStateDescriptionColor
-            )*/
-            mStateDescriptionColor = a.getColor(
-                R.styleable.StateProgressBar_spb_stateDescriptionColor,
-                mStateDescriptionColor
-            )
+        mBackgroundColor =
+            a.getColor(R.styleable.StateProgressBar_spb_stateBackgroundColor, mBackgroundColor)
+        mForegroundColor =
+            a.getColor(R.styleable.StateProgressBar_spb_stateForegroundColor, mForegroundColor)
+        /*mStateNumberBackgroundColor = a.getColor(
+        R.styleable.StateProgressBar_spb_stateNumberBackgroundColor,
+        mStateNumberBackgroundColor
+    )
+    mStateNumberForegroundColor = a.getColor(
+        R.styleable.StateProgressBar_spb_stateNumberForegroundColor,
+        mStateNumberForegroundColor
+    )
+    mCurrentStateDescriptionColor = a.getColor(
+        R.styleable.StateProgressBar_spb_currentStateDescriptionColor,
+        mCurrentStateDescriptionColor
+    )*/
+        mStateDescriptionColor = a.getColor(
+            R.styleable.StateProgressBar_spb_stateDescriptionColor,
+            mStateDescriptionColor
+        )
 
-            mCurrentStateNumber = a.getInteger(
-                R.styleable.StateProgressBar_spb_currentStateNumber,
-                mCurrentStateNumber
-            )
-            mMaxStateNumber =
-                a.getInteger(R.styleable.StateProgressBar_spb_maxStateNumber, mMaxStateNumber)
+        /*mCurrentStateNumber = a.getInteger(
+        R.styleable.StateProgressBar_spb_currentStateNumber,
+        mCurrentStateNumber
+    )
+    mMaxStateNumber =
+        a.getInteger(R.styleable.StateProgressBar_spb_maxStateNumber, mMaxStateNumber)*/
 
-            mStateSize = a.getDimension(R.styleable.StateProgressBar_spb_stateSize, mStateSize)
-            mStateNumberTextSize =
-                a.getDimension(R.styleable.StateProgressBar_spb_stateTextSize, mStateNumberTextSize)
-            mStateDescriptionSize = a.getDimension(
-                R.styleable.StateProgressBar_spb_stateDescriptionSize,
-                mStateDescriptionSize
-            )
-            mStateLineThickness = a.getDimension(
-                R.styleable.StateProgressBar_spb_stateLineThickness,
-                mStateLineThickness
-            )
+        mStateSize = a.getDimension(R.styleable.StateProgressBar_spb_stateSize, mStateSize)
+        mStateNumberTextSize =
+            a.getDimension(R.styleable.StateProgressBar_spb_stateTextSize, mStateNumberTextSize)
+        mStateDescriptionSize = a.getDimension(
+            R.styleable.StateProgressBar_spb_stateDescriptionSize,
+            mStateDescriptionSize
+        )
+        mStateLineThickness = a.getDimension(
+            R.styleable.StateProgressBar_spb_stateLineThickness,
+            mStateLineThickness
+        )
 
-            mCheckStateCompleted = a.getBoolean(
-                R.styleable.StateProgressBar_spb_checkStateCompleted,
-                mCheckStateCompleted
-            )
-            mAnimateToCurrentProgressState = a.getBoolean(
-                R.styleable.StateProgressBar_spb_animateToCurrentProgressState,
-                mAnimateToCurrentProgressState
-            )
-            mEnableAllStatesCompleted = a.getBoolean(
-                R.styleable.StateProgressBar_spb_enableAllStatesCompleted,
-                mEnableAllStatesCompleted
-            )
+        mCheckStateCompleted = a.getBoolean(
+            R.styleable.StateProgressBar_spb_checkStateCompleted,
+            mCheckStateCompleted
+        )
 
-            mDescTopSpaceDecrementer = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionTopSpaceDecrementer,
-                mDescTopSpaceDecrementer
-            )
-            mDescTopSpaceIncrementer = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionTopSpaceIncrementer,
-                mDescTopSpaceIncrementer
-            )
+        mEnableAllStatesCompleted = a.getBoolean(
+            R.styleable.StateProgressBar_spb_enableAllStatesCompleted,
+            mEnableAllStatesCompleted
+        )
 
-            mAnimDuration =
-                a.getInteger(R.styleable.StateProgressBar_spb_animationDuration, mAnimDuration)
-            mAnimStartDelay =
-                a.getInteger(R.styleable.StateProgressBar_spb_animationStartDelay, mAnimStartDelay)
-
-            mIsStateNumberDescending = a.getBoolean(
-                R.styleable.StateProgressBar_spb_stateNumberIsDescending,
-                mIsStateNumberDescending
-            )
-
-            mMaxDescriptionLine = a.getInteger(
-                R.styleable.StateProgressBar_spb_maxDescriptionLines,
-                mMaxDescriptionLine
-            )
-
-            mDescriptionLinesSpacing = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionLinesSpacing,
-                mDescriptionLinesSpacing
-            )
-
-            mJustifyMultilineDescription = a.getBoolean(
-                R.styleable.StateProgressBar_spb_justifyMultilineDescription,
-                mJustifyMultilineDescription
-            )
+        /*mDescTopSpaceDecrementer = a.getDimension(
+        R.styleable.StateProgressBar_spb_descriptionTopSpaceDecrementer,
+        mDescTopSpaceDecrementer
+    )
+    mDescTopSpaceIncrementer = a.getDimension(
+        R.styleable.StateProgressBar_spb_descriptionTopSpaceIncrementer,
+        mDescTopSpaceIncrementer
+    )*/
 
 
-            /*if (!mAnimateToCurrentProgressState) {
-                stopAnimation()
-            }*/
+        /*mIsStateNumberDescending = a.getBoolean(
+        R.styleable.StateProgressBar_spb_stateNumberIsDescending,
+        mIsStateNumberDescending
+    )*/
 
-            resolveStateSize()
-            validateLineThickness(mStateLineThickness)
-            validateStateNumber(mCurrentStateNumber)
+        mMaxDescriptionLine = a.getInteger(
+            R.styleable.StateProgressBar_spb_maxDescriptionLines,
+            mMaxDescriptionLine
+        )
 
-            mStateRadius = mStateSize / 2
+        mDescriptionLinesSpacing = a.getDimension(
+            R.styleable.StateProgressBar_spb_descriptionLinesSpacing,
+            mDescriptionLinesSpacing
+        )
 
-            a.recycle()
-        }
+        /*mJustifyMultilineDescription = a.getBoolean(
+        R.styleable.StateProgressBar_spb_justifyMultilineDescription,
+        mJustifyMultilineDescription
+    )*/
+
+
+        /*if (!mAnimateToCurrentProgressState) {
+        stopAnimation()
+    }*/
+
+        resolveStateSize()
+        validateLineThickness(mStateLineThickness)
+        validateStateNumber(mCurrentStateNumber)
+
+        mStateRadius = mStateSize / 2
+
+        a.recycle()
     }
 
     private fun initParams() {

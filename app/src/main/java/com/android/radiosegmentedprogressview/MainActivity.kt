@@ -1,13 +1,7 @@
 package com.android.radiosegmentedprogressview
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import com.android.radiosegmentedprogressview.progressview.ProgressIndicatorView
-import com.android.radiosegmentedprogressview.stateprogress.StateProgressView
 import com.android.radiosegmentedprogressview.stateprogress.SurveyProgressBar
 import java.util.ArrayList
 
@@ -17,7 +11,7 @@ class MainActivity : AppCompatActivity() {
             "View 7", "View 8", "View 9", "View 10", "View 11", "View 12"};*/
 
     private val amtList: MutableList<String> = arrayListOf("$65k", "$65k", "$65k", "$65k", "$65k")
-    private val descList: MutableList<String> = arrayListOf("desc", "desc", "desc", "desc", "desc")
+    private val descList: MutableList<String> = arrayListOf("05/07/2022", "05/07/2022", "05/07/2022", "05/07/2022", "05/07/2022")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,28 +23,36 @@ class MainActivity : AppCompatActivity() {
         stateProgressBar.setStateTextRowOneData(descList as ArrayList<String>)
         stateProgressBar.setStateDescriptionData(amtList as ArrayList<String>)
 //mStateTextAData
-        stateProgressBar.setStateSize(4f)
+        stateProgressBar.setStateSize(5f)
         stateProgressBar.setMaxStateNumber(4)
-        stateProgressBar.setCurrentStateNumber(4)
+        //stateProgressBar.setAllStatesCompleted(true)
+        stateProgressBar.setCurrentStateNumber(2)
+
+        stateProgressBar.setStateSubtextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
+        stateProgressBar.setStateTextValueColor(getColor(R.color.black))
+
+        stateProgressBar.setForegroundColor(getColor(R.color.purple_700))
+
         //stateProgressBar.setAllStatesCompleted(true)
         //stateProgressBar.setStateNumberTextSize(1f)
         stateProgressBar.setStateLineThickness(3.3f)
 
-        //stateProgressBar.enableAnimationToCurrentState(false)
+
         stateProgressBar.setDescriptionTopSpaceIncrementer(75f)
-        stateProgressBar.setStateDescriptionSize(12f)
+        stateProgressBar.setStateTextValueSize(12f)
+        stateProgressBar.setStateSubtextSize(10f)
 
         /*stateProgressBar.setCurrentStateDescriptionColor(this.getColor(this, R.color.description_foreground_color));
         stateProgressBar.setStateDescriptionColor(this.getColor(this,  R.color.description_background_color));
 */
-        stateProgressBar.setStateDescriptionTypeface("fonts/RobotoSlab-Light.ttf")
-        stateProgressBar.setStateNumberTypeface("fonts/Questrial-Regular.ttf")
+        /*stateProgressBar.setStateDescriptionTypeface("fonts/RobotoSlab-Light.ttf")
+        stateProgressBar.setStateNumberTypeface("fonts/Questrial-Regular.ttf")*/
 
-        stateProgressBar.setMaxDescriptionLine(1)
+        /*stateProgressBar.setMaxDescriptionLine(1)
         stateProgressBar.setJustifyMultilineDescription(false)
-        stateProgressBar.setDescriptionLinesSpacing(20f)
+        stateProgressBar.setDescriptionLinesSpacing(20f)*/
 
-        stateProgressBar.setStateNumberIsDescending(false)
+        //stateProgressBar.setStateNumberIsDescending(false)
 
        /* val progressIndicatorView =
             findViewById<ProgressIndicatorView>(R.id.progressIndicatorViewLayout)
