@@ -2,6 +2,7 @@ package com.android.radiosegmentedprogressview
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.android.radiosegmentedprogressview.stateprogress.SubwayProgressCustomView
 import com.android.radiosegmentedprogressview.stateprogress.SurveyProgressBar
 import java.util.ArrayList
 
@@ -19,10 +20,30 @@ class MainActivity : AppCompatActivity() {
 
         /*StateProgressBar stateProgressBar = (StateProgressBar) findViewById(R.id.your_state_progress_bar_id);
     stateProgressBar.setStateDescriptionData(descriptionData);*/
-        val stateProgressBar =  findViewById<SurveyProgressBar>(R.id.progressIndicatorViewLayout)
-        stateProgressBar.setStateTextRowOneData(descList as ArrayList<String>)
+      //  val stateProgressBar =  findViewById<SurveyProgressBar>(R.id.progressIndicatorViewLayout)
+
+        val spb = findViewById<SubwayProgressCustomView>(R.id.progressIndicatorViewLayout01)
+        spb.setCustomViewTitle("this is custom title")
+        spb.setStateSubTextData(descList)
+        spb.setStateTextValueData(amtList)
+        spb.setProgressCurrentCompletedState(2)
+        spb.setStateSubTextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
+        spb.setStateTextValueColor(getColor(R.color.black))
+        spb.setProgressbarSelectedColor(getColor(R.color.teal_700))
+
+        val spb02 = findViewById<SubwayProgressCustomView>(R.id.progressIndicatorViewLayout01)
+        spb02.setCustomViewTitle("**this is custom title 02**")
+        spb.setStateSubTextData(descList)
+        spb.setStateTextValueData(amtList)
+        spb.setProgressCurrentCompletedState(1)
+        spb.setStateSubTextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
+        spb.setStateTextValueColor(getColor(R.color.black))
+        spb.setProgressbarSelectedColor(getColor(R.color.teal_700))
+
+        //----------------
+       /* stateProgressBar.setStateTextRowOneData(descList as ArrayList<String>)
         stateProgressBar.setStateDescriptionData(amtList as ArrayList<String>)
-//mStateTextAData
+
         stateProgressBar.setStateSize(5f)
         stateProgressBar.setMaxStateNumber(4)
         //stateProgressBar.setAllStatesCompleted(true)
@@ -31,16 +52,18 @@ class MainActivity : AppCompatActivity() {
         stateProgressBar.setStateSubtextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
         stateProgressBar.setStateTextValueColor(getColor(R.color.black))
 
-        stateProgressBar.setForegroundColor(getColor(R.color.purple_700))
+        stateProgressBar.setForegroundColor(getColor(R.color.purple_700))*/
+
+        //----------------
 
         //stateProgressBar.setAllStatesCompleted(true)
         //stateProgressBar.setStateNumberTextSize(1f)
-        stateProgressBar.setStateLineThickness(3.3f)
+        //stateProgressBar.setStateLineThickness(3.3f)
 
 
-        stateProgressBar.setDescriptionTopSpaceIncrementer(75f)
+       /* stateProgressBar.setDescriptionTopSpaceIncrementer(75f)
         stateProgressBar.setStateTextValueSize(12f)
-        stateProgressBar.setStateSubtextSize(10f)
+        stateProgressBar.setStateSubtextSize(10f)*/
 
         /*stateProgressBar.setCurrentStateDescriptionColor(this.getColor(this, R.color.description_foreground_color));
         stateProgressBar.setStateDescriptionColor(this.getColor(this,  R.color.description_background_color));

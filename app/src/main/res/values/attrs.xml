@@ -17,5 +17,6 @@
         <attr name="spb_enableAllStatesCompleted" format="boolean" />
         <attr name="spb_descriptionLinesSpacing" format="dimension" />
         <attr name="spb_maxDescriptionLines" format="integer" />
+        <attr name="spb_title" format="string"/>
     </declare-styleable>
 </resources>

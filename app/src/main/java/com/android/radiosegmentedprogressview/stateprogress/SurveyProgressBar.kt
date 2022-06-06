@@ -10,21 +10,25 @@ import androidx.core.content.ContextCompat
 import com.android.radiosegmentedprogressview.R
 import kotlin.collections.ArrayList
 
-class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : View(
-    context,
-    attrs,
-    defStyle
-) {
+class SurveyProgressBar : View {
 
-    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
+    constructor(context: Context) : super(context) {
+        initClass(context)
+    }
 
-    init {
-        initClass(context, attrs, defStyle)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs, 0) {
+        initClass(context, attrs)
         initializePainters()
         updateCheckAllStatesValues(mEnableAllStatesCompleted)
     }
 
-    private fun initClass(context: Context, attrs: AttributeSet, defStyle: Int) {
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    )
+
+    private fun initClass(context: Context, attrs: AttributeSet? = null) {
         initParams()
 
         mStateTextValueSize = convertSpToPixel(mStateTextValueSize)
@@ -35,7 +39,7 @@ class SurveyProgressBar(context: Context, attrs: AttributeSet, defStyle: Int) : 
         mDefaultTypefaceNormal = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
         if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, defStyle, 0)
+            val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, 0, 0)
 
             mBackgroundColor =
                 a.getColor(R.styleable.StateProgressBar_spb_stateBackgroundColor, mBackgroundColor)
