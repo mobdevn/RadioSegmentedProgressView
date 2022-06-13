@@ -174,7 +174,7 @@ class SurveyProgressBarUtil(context: Context, attrs: AttributeSet?) {
     }
 
     /**
-     * Part of init method
+     * Initialise default values of the SPB
      * */
     private fun setupMetrics(context: Context) {
         mStateTextValueSize = context.dp(mStateTextValueSize)
