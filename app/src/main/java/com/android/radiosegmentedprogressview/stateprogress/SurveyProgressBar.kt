@@ -459,64 +459,96 @@ class SurveyProgressBar : View {
         textSize: Float
     ) {
         val xPos: Int
-        var yPos: Int
         val relativePosition =
             (mCellHeight + textSize - spbUtil.mSpacing - mDescTopSpaceDecrementer + spbUtil.mDescTopSpaceIncrementer).toInt()
 
         if (i < spbUtil.mMaxStateNumber) {
             xPos = (mNextCellWidth - mCellWidth / 2).toInt()
 
-            if (spbUtil.mIsDescriptionMultiline && spbUtil.mMaxDescriptionLine > 1) {
+            checkDrawTextOnCanvas(canvas, xPos, textColor, text, mDescTopSpaceDecrementer, textSize, relativePosition)
 
-                var nextLineCounter = 0
-                val stateDescriptionLines: Array<String> =
-                    text.split(spbUtil.STATE_DESCRIPTION_LINE_SEPARATOR)
-                        .toTypedArray()
+            mNextCellWidth += mCellWidth
+        }
+    }
 
-                for (line in stateDescriptionLines) {
-                    nextLineCounter += 1
+    /**
+     * This method checks if data to be displayed has multiple lines or can be displayed in single
+     * line, post that it draws the text on canvas
+     * */
+    private fun checkDrawTextOnCanvas(
+        canvas: Canvas,
+        xPos: Int,
+        textColor: Paint,
+        text: String,
+        mDescTopSpaceDecrementer: Float,
+        textSize: Float,
+        relativePosition: Int
+    ) {
+        if (spbUtil.mIsDescriptionMultiline && spbUtil.mMaxDescriptionLine > 1) {
 
-                    val newXPos = getXPosition(
-                        nextLineCounter, stateDescriptionLines[0],
-                        line,
-                        textColor,
-                        xPos
-                    )
+            setupTextToDrawOnCanvas(canvas, xPos, textColor, text, mDescTopSpaceDecrementer, textSize)
 
-                    if (nextLineCounter <= spbUtil.mMaxDescriptionLine) {
-                        var rNumberVal = 0.0f
-                        if (nextLineCounter > 1) {
-                            rNumberVal = spbUtil.mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
-                        }
-                        yPos = ((mCellHeight
-                                + nextLineCounter
-                                * textSize
-                                - spbUtil.mSpacing
-                                - mDescTopSpaceDecrementer
-                                + spbUtil.mDescTopSpaceIncrementer
-                                + rNumberVal
-                                ).toInt())
+        } else {
+            drawTextOnCanvas(
+                canvas, text,
+                xPos.toFloat(),
+                relativePosition.toFloat(),
+                textColor
+            )
+        }
+    }
 
+    /**
+     * This method draws the actual text shared to draw on canvas with iteration of each
+     * character on it.
+     * */
+    private fun setupTextToDrawOnCanvas(
+        canvas: Canvas,
+        xPos: Int,
+        textColor: Paint,
+        text: String,
+        mDescTopSpaceDecrementer: Float,
+        textSize: Float,
+    ) {
+        var nextLineCounter = 0
+        val stateDescriptionLines: Array<String> =
+            text.split(spbUtil.STATE_DESCRIPTION_LINE_SEPARATOR)
+                .toTypedArray()
 
-                        val xPosition = (if (newXPos == 0) xPos else newXPos.toFloat()) as Float
-                        drawTextOnCanvas(
-                            canvas,
-                            line,
-                            xPosition,
-                            yPos.toFloat(),
-                            textColor
-                        )
-                    }
+        for (line in stateDescriptionLines) {
+            nextLineCounter += 1
+
+            val newXPos = getXPosition(
+                nextLineCounter, stateDescriptionLines[0],
+                line,
+                textColor,
+                xPos
+            )
+
+            if (nextLineCounter <= spbUtil.mMaxDescriptionLine) {
+                var rNumberVal = 0.0f
+                if (nextLineCounter > 1) {
+                    rNumberVal = spbUtil.mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
                 }
-            } else {
+                val yPos = ((mCellHeight
+                        + nextLineCounter
+                        * textSize
+                        - spbUtil.mSpacing
+                        - mDescTopSpaceDecrementer
+                        + spbUtil.mDescTopSpaceIncrementer
+                        + rNumberVal
+                        ).toInt())
+
+
+                val xPosition = (if (newXPos == 0) xPos else newXPos.toFloat()) as Float
                 drawTextOnCanvas(
-                    canvas, text,
-                    xPos.toFloat(),
-                    relativePosition.toFloat(),
+                    canvas,
+                    line,
+                    xPosition,
+                    yPos.toFloat(),
                     textColor
                 )
             }
-            mNextCellWidth += mCellWidth
         }
     }
 
