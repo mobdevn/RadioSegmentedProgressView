@@ -1,24 +1,25 @@
 package com.android.radiosegmentedprogressview.stateprogress
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.radiosegmentedprogressview.R
 
-class SubwayProgressCustomView(context: Context, attrs: AttributeSet ): LinearLayout(context, attrs) {
+@SuppressLint("CustomViewStyleable")
+class SubwayProgressCustomView(context: Context, attrs: AttributeSet): LinearLayout(context, attrs) {
 
     private val customTitle: TextView
-    private val spb: SurveyProgressBar = SurveyProgressBar(context, attrs)
+    private val spb: SurveyProgressBar
     init {
         orientation = VERTICAL
         val view = inflate(context, R.layout.subway_progress_customview, this)
-        customTitle = view.findViewById<TextView>(R.id.customview_text_title)
+        spb = SurveyProgressBar(context, attrs)
+        customTitle = view.findViewById(R.id.customview_text_title)
 
         context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar).let {
-
             title = it.getString(R.styleable.StateProgressBar_spb_title).orEmpty()
-
             it.recycle()
         }
     }
@@ -45,26 +46,26 @@ class SubwayProgressCustomView(context: Context, attrs: AttributeSet ): LinearLa
 
     public fun setSubwayProgressPoints(points: Int) {
         spb.setMaxStateNumber(points)
-        invalidate()
+        //invalidate()
     }
 
     public fun setProgressCurrentCompletedState(position: Int) {
         spb.setCurrentStateNumber(position)
-        invalidate()
+        //invalidate()
     }
 
     public fun setStateTextValueColor(color: Int) {
         spb.setStateTextValueColor(color)
-        invalidate()
+        //invalidate()
     }
 
     public fun setStateSubTextColor(color: Int) {
         spb.setStateSubtextColor(color)
-        invalidate()
+        //invalidate()
     }
 
     public fun setProgressbarSelectedColor(color: Int) {
         spb.setForegroundColor(color)
-        invalidate()
+        //invalidate()
     }
 }

@@ -6,275 +6,200 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.ContextCompat
-import com.android.radiosegmentedprogressview.R
 import kotlin.collections.ArrayList
 
+/**
+ * @Intro
+ * This is a static view-component which can be used to show the progress of anykind of
+ * data or process or state or work or anykind of representation that is required to
+ * provide information to the end user about the start, current and last stages of the process
+ *
+ * Subway Progress Bar, is usually used to describe/represent the various check-points in the
+ * process which indicates where the process is at that given point of time.
+ *
+ * Subway Progress Bar is custom component that is developed to use across the application
+ * for similar(above described) process
+ *
+ * @Features
+ *
+ * This is dynamic component that can be used across the application and all attributes of this
+ * component like
+ *  - Subway Points
+ *  - Thickness of the line
+ *  - Data in first and second row
+ *  Can be changed dynamically, Developer can use his/her choice of color, data, and adjust the
+ *  thickness of the component
+ * */
 class SurveyProgressBar : View {
 
     constructor(context: Context) : super(context) {
-        initClass(context)
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs, 0) {
-        initClass(context, attrs)
-        initializePainters()
-        updateCheckAllStatesValues(mEnableAllStatesCompleted)
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
-        context,
-        attrs,
-        defStyle
-    )
-
-    private fun initClass(context: Context, attrs: AttributeSet? = null) {
         initParams()
-
-        mStateTextValueSize = convertSpToPixel(mStateTextValueSize)
-        mStateSubtextSize = convertSpToPixel(mStateSubtextSize)
-        mStateLineThickness = convertDpToPixel(mStateLineThickness)
-        mSpacing = convertDpToPixel(mSpacing)
-        mDefaultTypefaceBold = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        mDefaultTypefaceNormal = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-
-        if (attrs != null) {
-            val a = context.obtainStyledAttributes(attrs, R.styleable.StateProgressBar, 0, 0)
-
-            mBackgroundColor =
-                a.getColor(R.styleable.StateProgressBar_spb_stateBackgroundColor, mBackgroundColor)
-            mForegroundColor =
-                a.getColor(R.styleable.StateProgressBar_spb_stateForegroundColor, mForegroundColor)
-
-            mStateSize = a.getDimension(R.styleable.StateProgressBar_spb_stateSize, mStateSize)
-
-            mStateTextValueSize = a.getDimension(
-                R.styleable.StateProgressBar_spb_stateDescriptionSize,
-                mStateTextValueSize
-            )
-
-            mStateSubtextSize = a.getDimension(
-                R.styleable.StateProgressBar_spb_stateDescriptionSize,
-                mStateSubtextSize
-            )
-
-            mStateLineThickness = a.getDimension(
-                R.styleable.StateProgressBar_spb_stateLineThickness,
-                mStateLineThickness
-            )
-
-            mCheckStateCompleted = a.getBoolean(
-                R.styleable.StateProgressBar_spb_checkStateCompleted,
-                mCheckStateCompleted
-            )
-
-            mEnableAllStatesCompleted = a.getBoolean(
-                R.styleable.StateProgressBar_spb_enableAllStatesCompleted,
-                mEnableAllStatesCompleted
-            )
-
-            mMaxDescriptionLine = a.getInteger(
-                R.styleable.StateProgressBar_spb_maxDescriptionLines,
-                mMaxDescriptionLine
-            )
-
-            mDescriptionLinesSpacing = a.getDimension(
-                R.styleable.StateProgressBar_spb_descriptionLinesSpacing,
-                mDescriptionLinesSpacing
-            )
-
-            validateLineThickness(mStateLineThickness)
-            validateStateNumber(mCurrentStateNumber)
-
-            a.recycle()
-        }
     }
 
-    private fun initParams() {
-        mBackgroundColor = ContextCompat.getColor(context, R.color.background_color)
-        mForegroundColor = ContextCompat.getColor(context, R.color.foreground_color)
-
-        mStateTextValueColor = ContextCompat.getColor(context, R.color.background_text_color)
-        mStateSubtextColor = ContextCompat.getColor(context, R.color.black)
-
-        mStateSize = 0.0f
-        mStateLineThickness = 4.0f
-        mStateTextValueSize = 12f
-        mStateSubtextSize = 15f
-        mMaxStateNumber = 5
-        mCurrentStateNumber = 0
-        mSpacing = 4.0f
-        mDescTopSpaceDecrementer = 0.0f
-        mDescTopSpaceIncrementer = 0.0f
-        mDescriptionLinesSpacing = 0.0f
-        mCheckStateCompleted = false
-        mEnableAllStatesCompleted = false
-        mJustifyMultilineDescription = false
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        initParams(attrs)
     }
 
+    private fun initParams(attrs: AttributeSet? = null) {
+        spbUtil = SurveyProgressBarUtil(context, attrs)
+        initializePainters()
+    }
+
+    /**
+     * Init the default values of the component
+     * */
     private fun initializePainters() {
-        mBackgroundPaint = setPaintAttributes(mStateLineThickness, mBackgroundColor)
-        mForegroundPaint = setPaintAttributes(mStateLineThickness, mForegroundColor)
+        spbUtil.mBackgroundPaint = setPaintAttributes(spbUtil.mStateLineThickness, spbUtil.mBackgroundColor)
+        spbUtil.mForegroundPaint = setPaintAttributes(spbUtil.mStateLineThickness, spbUtil.mForegroundColor)
 
-        mStateTextValuePaint = setPaintAttributes(
-            mStateTextValueSize, mStateTextValueColor, mDefaultTypefaceBold!!
+        spbUtil.mStateTextValuePaint = setPaintAttributes(
+            spbUtil.mStateTextValueSize, spbUtil.mStateTextValueColor, spbUtil.mDefaultTypefaceBold!!
         )
-        mStateSubtextPaint = setPaintAttributes(
-            mStateSubtextSize, mStateSubtextColor, mDefaultTypefaceNormal!!
+        spbUtil.mStateSubtextPaint = setPaintAttributes(
+            spbUtil.mStateSubtextSize, spbUtil.mStateSubtextColor, spbUtil.mDefaultTypefaceNormal!!
         )
     }
 
-    private fun validateLineThickness(lineThickness: Float) {
-        val halvedStateSize = mStateSize / 2
-        if (lineThickness > halvedStateSize) {
-            mStateLineThickness = halvedStateSize
-        }
-    }
-
+    /**
+     * Sets the un-progress color of the component
+     * */
     override fun setBackgroundColor(backgroundColor: Int) {
-        mBackgroundColor = backgroundColor
-        mBackgroundPaint!!.color = mBackgroundColor
-        invalidate()
+        spbUtil.mBackgroundColor = backgroundColor
+        spbUtil.mBackgroundPaint!!.color = spbUtil.mBackgroundColor
     }
 
+    /**
+     * Sets the in-progress color of the component
+     * */
     fun setForegroundColor(foregroundColor: Int) {
-        mForegroundColor = foregroundColor
-        mForegroundPaint!!.color = mForegroundColor
-        invalidate()
+        spbUtil.mForegroundColor = foregroundColor
+        spbUtil.mForegroundPaint!!.color = spbUtil.mForegroundColor
     }
 
+    /**
+     * Sets the thickness of the line
+     * */
     fun setStateLineThickness(stateLineThickness: Float) {
-        mStateLineThickness = convertDpToPixel(stateLineThickness)
+        spbUtil.mStateLineThickness = convertDpToPixel(stateLineThickness)
         resolveStateLineThickness()
     }
 
+    /**
+     * Resolve/reset the thickness of the line on re-draw
+     * */
     private fun resolveStateLineThickness() {
-        validateLineThickness(mStateLineThickness)
-        mBackgroundPaint!!.strokeWidth = mStateLineThickness
-        mForegroundPaint!!.strokeWidth = mStateLineThickness
+        spbUtil.validateLineThickness(spbUtil.mStateLineThickness)
+        spbUtil.mBackgroundPaint!!.strokeWidth = spbUtil.mStateLineThickness
+        spbUtil.mForegroundPaint!!.strokeWidth = spbUtil.mStateLineThickness
         invalidate()
     }
 
+    /**
+     * Sets the text color of data in first row
+     * */
     fun setStateTextValueColor(stateTextValueColor: Int) {
-        mStateTextValueColor = stateTextValueColor
-        mStateTextValuePaint!!.color = mStateTextValueColor
+        spbUtil.mStateTextValueColor = stateTextValueColor
+        spbUtil.mStateTextValuePaint!!.color = spbUtil.mStateTextValueColor
         invalidate()
     }
 
-
+    /**
+     * Sets the text color of data in second row
+     * */
     fun setStateSubtextColor(color: Int) {
-        mStateSubtextColor = color
-        mStateSubtextPaint!!.color = mStateSubtextColor
+        spbUtil.mStateSubtextColor = color
+        spbUtil.mStateSubtextPaint!!.color = spbUtil.mStateSubtextColor
         invalidate()
     }
 
 
+    /**
+     * Sets the current completed sub-way points
+     * */
     fun setCurrentStateNumber(currentStateNumber: Int) {
-        if (currentStateNumber < 0 || currentStateNumber > mMaxStateNumber) {
-            mCurrentStateNumber = 0
+        if (currentStateNumber < 0 || currentStateNumber > spbUtil.mMaxStateNumber) {
+            spbUtil.mCurrentStateNumber = 0
             return
         }
-        mCurrentStateNumber = currentStateNumber
-        updateCheckAllStatesValues(mEnableAllStatesCompleted)
+        spbUtil.mCurrentStateNumber = currentStateNumber
+        resetAllStateValues(spbUtil.mEnableAllStatesCompleted)
         invalidate()
     }
 
+    /**
+     * Sets the max number of subway points
+     * */
     fun setMaxStateNumber(maximumState: Int) {
-        mMaxStateNumber = maximumState
+        spbUtil.mMaxStateNumber = maximumState
         resolveMaxStateNumber()
     }
 
+    /**
+     * Redraws the state subway points on refresh of canvas
+     * */
     private fun resolveMaxStateNumber() {
-        validateStateNumber(mCurrentStateNumber)
-        updateCheckAllStatesValues(mEnableAllStatesCompleted)
+        validateStateNumber(spbUtil.mCurrentStateNumber)
+        resetAllStateValues(spbUtil.mEnableAllStatesCompleted)
         invalidate()
     }
 
+    /**
+     * Size of the subway view point
+     * */
     fun setStateSize(stateSize: Float) {
-        mStateSize = convertDpToPixel(stateSize)
+        spbUtil.mStateSize = convertDpToPixel(stateSize)
         resetStateSizeValues()
     }
 
+    /**
+     * Resets the size of line thickness for both in-progress and un-progress line views
+     * */
     private fun resetStateSizeValues() {
-        validateLineThickness(mStateLineThickness)
-        mBackgroundPaint!!.strokeWidth = mStateLineThickness
-        mForegroundPaint!!.strokeWidth = mStateLineThickness
-        requestLayout()
+        spbUtil.validateLineThickness(spbUtil.mStateLineThickness)
+        spbUtil.mBackgroundPaint!!.strokeWidth = spbUtil.mStateLineThickness
+        spbUtil.mForegroundPaint!!.strokeWidth = spbUtil.mStateLineThickness
     }
 
+    /**
+     * Set the font size of the first row of data in subway point
+     * */
     fun setStateTextValueSize(stateDescriptionSize: Float) {
-        mStateTextValueSize = convertSpToPixel(stateDescriptionSize)
+        spbUtil.mStateTextValueSize = convertSpToPixel(stateDescriptionSize)
         resolveStateDescriptionSize()
     }
 
+    /**
+     * Set the font size of the second row of data in subway point
+     * */
     fun setStateSubtextSize(stateValueSize: Float) {
-        mStateSubtextSize = convertSpToPixel(stateValueSize)
+        spbUtil.mStateSubtextSize = convertSpToPixel(stateValueSize)
         resolveSubtextSize()
     }
 
     private fun resolveStateDescriptionSize() {
-        mStateTextValuePaint!!.textSize = mStateTextValueSize
+        spbUtil.mStateTextValuePaint!!.textSize = spbUtil.mStateTextValueSize
         requestLayout()
     }
 
     private fun resolveSubtextSize() {
-        mStateSubtextPaint!!.textSize = mStateSubtextSize
+        spbUtil.mStateSubtextPaint!!.textSize = spbUtil.mStateSubtextSize
         requestLayout()
     }
 
-    fun checkStateCompleted(checkStateCompleted: Boolean) {
-        mCheckStateCompleted = checkStateCompleted
-        invalidate()
-    }
-
-    fun setAllStatesCompleted(enableAllStatesCompleted: Boolean) {
-        mEnableAllStatesCompleted = enableAllStatesCompleted
-        updateCheckAllStatesValues(mEnableAllStatesCompleted)
-        invalidate()
-    }
-
-    private fun updateCheckAllStatesValues(enableAllStatesCompleted: Boolean) {
+    private fun resetAllStateValues(enableAllStatesCompleted: Boolean) {
         if (enableAllStatesCompleted) {
-            mCheckStateCompleted = true
-            mCurrentStateNumber = mMaxStateNumber
+            spbUtil.mCheckStateCompleted = true
+            spbUtil.mCurrentStateNumber = spbUtil.mMaxStateNumber
         }
+        invalidate()
     }
 
     private fun validateStateNumber(stateNumber: Int) {
-        check(stateNumber <= mMaxStateNumber) { "State number ($stateNumber) cannot be greater than total number of states $mMaxStateNumber" }
-    }
-
-    fun setDescriptionTopSpaceIncrementer(spaceIncrementer: Float) {
-        mDescTopSpaceIncrementer = spaceIncrementer
-        requestLayout()
-    }
-
-    fun setDescriptionTopSpaceDecrementer(spaceDecrementer: Float) {
-        mDescTopSpaceDecrementer = spaceDecrementer
-        requestLayout()
-    }
-
-    fun setDescriptionLinesSpacing(descriptionLinesSpacing: Float) {
-        mDescriptionLinesSpacing = descriptionLinesSpacing
-        requestLayout()
-    }
-
-    fun isDescriptionMultiline(): Boolean {
-        return mIsDescriptionMultiline
+        check(stateNumber <= spbUtil.mCurrentStateNumber) { "State number ($stateNumber) cannot be greater than total number of states ${spbUtil.mMaxStateNumber}" }
     }
 
     private fun updateDescriptionMultilineStatus(multiline: Boolean) {
-        mIsDescriptionMultiline = multiline
-    }
-
-    fun setMaxDescriptionLine(maxDescriptionLine: Int) {
-        mMaxDescriptionLine = maxDescriptionLine
-        requestLayout()
-    }
-
-    fun setJustifyMultilineDescription(justifyMultilineDescription: Boolean) {
-        mJustifyMultilineDescription = justifyMultilineDescription
-        invalidate()
+        spbUtil.mIsDescriptionMultiline = multiline
     }
 
     private fun setPaintAttributes(strokeWidth: Float, color: Int): Paint? {
@@ -298,18 +223,12 @@ class SurveyProgressBar : View {
         return paint
     }
 
-    private fun resolveStateSize() {
-        if (mStateSize != 0f) {
-            mStateSize = convertDpToPixel(DEFAULT_STATE_SIZE)
-        }
-    }
-
     private fun drawCircles(canvas: Canvas, paint: Paint, startIndex: Int, endIndex: Int) {
         for (i in startIndex until endIndex) {
             canvas.drawCircle(
                 mCellWidth * (i + 1) - mCellWidth / 2,
                 mCellHeight / 2,
-                mStateRadius,
+                spbUtil.mStateRadius,
                 paint
             )
         }
@@ -317,10 +236,8 @@ class SurveyProgressBar : View {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-
-        if (mMaxStateNumber == 0) mMaxStateNumber = 5
-
-        mCellWidth = (width / mMaxStateNumber).toFloat()
+        if (spbUtil.mMaxStateNumber == 0) spbUtil.mMaxStateNumber = 4
+        mCellWidth = (width / spbUtil.mMaxStateNumber).toFloat()
         mNextCellWidth = mCellWidth
     }
 
@@ -337,6 +254,9 @@ class SurveyProgressBar : View {
         mCellHeight = getCellHeight().toFloat()
     }
 
+    /**
+     * Return height of the view
+     * */
     private fun getDesiredHeight(): Int {
         return if (mStateDescriptionData.isEmpty()) {
             getCellHeight()
@@ -345,27 +265,37 @@ class SurveyProgressBar : View {
         }
     }
 
+    /**
+     * Calculates the total height of the view
+     * */
     private fun getHeightCalculatedVal(): Int {
-        val radius = (2 * mStateRadius).toInt()
-        val descCalculation = mDescTopSpaceIncrementer.toInt() - mDescTopSpaceDecrementer.toInt()
+        val radius = (2 * spbUtil.mStateRadius).toInt()
+        val descCalculation = spbUtil.mDescTopSpaceIncrementer.toInt()
+            .minus(spbUtil.mDescTopSpaceDecrementer.toInt())
         return if (checkForDescriptionMultiLine(mStateDescriptionData)) {
             val descHeight =
-                (selectMaxDescriptionLine(mMaxDescriptionLine) * (1.3 * mStateTextValueSize)).toInt()
-            radius + descHeight + mSpacing.toInt() + descCalculation + mDescriptionLinesSpacing.toInt()
+                (selectMaxDescriptionLine(spbUtil.mMaxDescriptionLine) * (1.3 * spbUtil.mStateTextValueSize)).toInt()
+            radius + descHeight + spbUtil.mSpacing.toInt() + descCalculation + spbUtil.mDescriptionLinesSpacing.toInt()
         } else {
-            radius + (1.3 * mStateTextValueSize).toInt() + mSpacing.toInt() + descCalculation
+            radius + (1.3 * spbUtil.mStateTextValueSize).toInt() + spbUtil.mSpacing.toInt() + descCalculation
         }
     }
 
+    /**
+     * Calculate height of the subway bar view
+     * */
     private fun getCellHeight(): Int {
-        return (2 * mStateRadius).toInt() + mSpacing.toInt()
+        return (2 * spbUtil.mStateRadius).toInt() + spbUtil.mSpacing.toInt()
     }
 
+    /**
+     * Check for multiple line visibility for the text in the view
+     * */
     private fun checkForDescriptionMultiLine(stateDescriptionData: List<String>): Boolean {
         var isMultiLine = false
         for (stateDescription in stateDescriptionData) {
             isMultiLine =
-                stateDescription.contains(STATE_DESCRIPTION_LINE_SEPARATOR)
+                stateDescription.contains(spbUtil.STATE_DESCRIPTION_LINE_SEPARATOR)
             if (isMultiLine) {
                 updateDescriptionMultilineStatus(isMultiLine)
                 return isMultiLine
@@ -378,11 +308,11 @@ class SurveyProgressBar : View {
         var maxLine = 1
         for (stateDescription in stateDescriptionData) {
             val lineSize: Int =
-                stateDescription.split(STATE_DESCRIPTION_LINE_SEPARATOR)
+                stateDescription.split(spbUtil.STATE_DESCRIPTION_LINE_SEPARATOR)
                     .toTypedArray().size
             maxLine = if (lineSize > maxLine) lineSize else maxLine
         }
-        mMaxDescriptionLine = maxLine
+        spbUtil.mMaxDescriptionLine = maxLine
         return maxLine
     }
 
@@ -408,15 +338,15 @@ class SurveyProgressBar : View {
      * Draw subway progress bar subway-points
      * */
     private fun drawBackgroundCircles(canvas: Canvas) {
-        mBackgroundPaint?.style = Paint.Style.STROKE
-        drawCircles(canvas, mBackgroundPaint!!, mCurrentStateNumber, mMaxStateNumber)
+        spbUtil.mBackgroundPaint?.style = Paint.Style.STROKE
+        drawCircles(canvas, spbUtil.mBackgroundPaint!!, spbUtil.mCurrentStateNumber, spbUtil.mMaxStateNumber)
     }
 
     /**
      * Draw selected subway-points on subway progress bar
      * */
     private fun drawForegroundCircles(canvas: Canvas) {
-        drawCircles(canvas, mForegroundPaint!!, 0, mCurrentStateNumber)
+        drawCircles(canvas, spbUtil.mForegroundPaint!!, 0, spbUtil.mCurrentStateNumber)
     }
 
     /**
@@ -424,18 +354,18 @@ class SurveyProgressBar : View {
      * with remaining un-selected states in iterations
      * */
     private fun drawBackgroundLines(canvas: Canvas) {
-        val iterations = if (mCurrentStateNumber != 0) {
-            (mMaxStateNumber - mCurrentStateNumber) + 1
+        val iterations = if (spbUtil.mCurrentStateNumber != 0) {
+            (spbUtil.mMaxStateNumber - spbUtil.mCurrentStateNumber) + 1
         } else {
-            mMaxStateNumber - mCurrentStateNumber
+            spbUtil.mMaxStateNumber - spbUtil.mCurrentStateNumber
         }
 
-        var si = if (mCurrentStateNumber - 1 < 0) 0 else mCurrentStateNumber - 1
-        var ei = if (mCurrentStateNumber == 0) mCurrentStateNumber + 2 else mCurrentStateNumber + 1
+        var si = if (spbUtil.mCurrentStateNumber - 1 < 0) 0 else spbUtil.mCurrentStateNumber - 1
+        var ei = if (spbUtil.mCurrentStateNumber == 0) spbUtil.mCurrentStateNumber + 2 else spbUtil.mCurrentStateNumber + 1
         for (i in 0 until iterations - 1) {
             si = if (i != 0) si + 1 else si
-            ei = if (i != 0 && ei + 1 <= mMaxStateNumber) ei + 1 else ei
-            drawLines(canvas, mBackgroundPaint!!, si, ei)
+            ei = if (i != 0 && ei + 1 <= spbUtil.mMaxStateNumber) ei + 1 else ei
+            drawLines(canvas, spbUtil.mBackgroundPaint!!, si, ei)
         }
     }
 
@@ -443,7 +373,7 @@ class SurveyProgressBar : View {
      * draw lines for selected progress states
      * */
     private fun drawForegroundLines(canvas: Canvas) {
-        drawLines(canvas, mForegroundPaint!!, 0, mCurrentStateNumber)
+        drawLines(canvas, spbUtil.mForegroundPaint!!, 0, spbUtil.mCurrentStateNumber)
     }
 
     /**
@@ -457,8 +387,8 @@ class SurveyProgressBar : View {
         if (endIndex > startIndex) {
             startCenterX = mCellWidth / 2 + mCellWidth * startIndex
             endCenterX = mCellWidth * endIndex - mCellWidth / 2
-            startX = startCenterX + mStateRadius * 0.75f
-            stopX = endCenterX - mStateRadius * 0.75f
+            startX = startCenterX + spbUtil.mStateRadius * 0.75f
+            stopX = endCenterX - spbUtil.mStateRadius * 0.75f
             canvas.drawLine(startX, mCellHeight / 2, stopX, mCellHeight / 2, paint)
         }
     }
@@ -470,9 +400,10 @@ class SurveyProgressBar : View {
     private fun drawLineToCurrentState(canvas: Canvas) {
         canvas.drawLine(
             mStartCenterX, mCellHeight / 2, mEndCenterX, mCellHeight / 2,
-            mForegroundPaint!!
+            spbUtil.mForegroundPaint!!
         )
         mNextCellWidth = mCellWidth
+        invalidate()
     }
 
     /**
@@ -484,14 +415,15 @@ class SurveyProgressBar : View {
                 drawTextViewOnCanvas(
                     canvas,
                     i,
-                    mStateTextValuePaint!!,
+                    spbUtil.mStateTextValuePaint!!,
                     mStateDescriptionData[i],
-                    60f,
-                    mStateTextValueSize
+                    0f,
+                    spbUtil.mStateTextValueSize
                 )
             }
         }
         mNextCellWidth = mCellWidth
+        invalidate()
     }
 
     /**
@@ -503,14 +435,15 @@ class SurveyProgressBar : View {
                 drawTextViewOnCanvas(
                     canvas,
                     i,
-                    mStateSubtextPaint!!,
+                    spbUtil.mStateSubtextPaint!!,
                     mStateTextAData[i],
-                    0f,
-                    mStateSubtextSize
+                    60f,
+                    spbUtil.mStateSubtextSize
                 )
             }
         }
         mNextCellWidth = mCellWidth
+        invalidate()
     }
 
     /**
@@ -528,16 +461,16 @@ class SurveyProgressBar : View {
         val xPos: Int
         var yPos: Int
         val relativePosition =
-            (mCellHeight + textSize - mSpacing - mDescTopSpaceDecrementer + mDescTopSpaceIncrementer).toInt()
+            (mCellHeight + textSize - spbUtil.mSpacing - mDescTopSpaceDecrementer + spbUtil.mDescTopSpaceIncrementer).toInt()
 
-        if (i < mMaxStateNumber) {
+        if (i < spbUtil.mMaxStateNumber) {
             xPos = (mNextCellWidth - mCellWidth / 2).toInt()
 
-            if (mIsDescriptionMultiline && mMaxDescriptionLine > 1) {
+            if (spbUtil.mIsDescriptionMultiline && spbUtil.mMaxDescriptionLine > 1) {
 
                 var nextLineCounter = 0
                 val stateDescriptionLines: Array<String> =
-                    text.split(STATE_DESCRIPTION_LINE_SEPARATOR)
+                    text.split(spbUtil.STATE_DESCRIPTION_LINE_SEPARATOR)
                         .toTypedArray()
 
                 for (line in stateDescriptionLines) {
@@ -550,17 +483,17 @@ class SurveyProgressBar : View {
                         xPos
                     )
 
-                    if (nextLineCounter <= mMaxDescriptionLine) {
+                    if (nextLineCounter <= spbUtil.mMaxDescriptionLine) {
                         var rNumberVal = 0.0f
                         if (nextLineCounter > 1) {
-                            rNumberVal = mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
+                            rNumberVal = spbUtil.mDescriptionLinesSpacing * (nextLineCounter - 1) * 2
                         }
                         yPos = ((mCellHeight
                                 + nextLineCounter
                                 * textSize
-                                - mSpacing
+                                - spbUtil.mSpacing
                                 - mDescTopSpaceDecrementer
-                                + mDescTopSpaceIncrementer
+                                + spbUtil.mDescTopSpaceIncrementer
                                 + rNumberVal
                                 ).toInt())
 
@@ -617,7 +550,7 @@ class SurveyProgressBar : View {
         textColor: Paint,
         pos: Int
     ): Int {
-        if (mJustifyMultilineDescription && counter > 1) {
+        if (spbUtil.mJustifyMultilineDescription && counter > 1) {
             return getNewXPosForDescriptionMultilineJustification(
                 descLine,
                 line,
@@ -660,6 +593,7 @@ class SurveyProgressBar : View {
     fun setStateTextRowOneData(stateTextOneData: List<String?>) {
         mStateTextAData = stateTextOneData as List<String>
         requestLayout()
+        invalidate()
     }
 
     /**
@@ -668,6 +602,7 @@ class SurveyProgressBar : View {
     fun setStateDescriptionData(stateDescriptionData: List<String>) {
         mStateDescriptionData = stateDescriptionData as ArrayList<String>
         requestLayout()
+        invalidate()
     }
 
     /**
@@ -689,31 +624,7 @@ class SurveyProgressBar : View {
     private companion object {
         private var mStateDescriptionData: List<String> = arrayListOf()
         private var mStateTextAData: List<String> = arrayListOf()
-
-        /**
-         * Subway point(circle) size defined as default value
-         * */
-        private var mStateRadius = 26.0f
-
-        /**
-         * Subway point(circle) size
-         * */
-        private var mStateSize = 0.0f
-
-        /**
-         * Define each line thickness from Point-Point
-         * */
-        private var mStateLineThickness = 3.3f
-
-        /**
-         * Defines Main-Text text size
-         * */
-        private var mStateSubtextSize = 0.0f
-
-        /**
-         * Defines Sub-Text text size
-         * */
-        private var mStateTextValueSize = 0.0f
+        private lateinit var spbUtil: SurveyProgressBarUtil
 
         /**
          * Cell width
@@ -739,47 +650,5 @@ class SurveyProgressBar : View {
          * center of last cell(state)
          */
         private var mEndCenterX = 0.0f
-
-        /**
-         * Maximum number of subway points
-         * */
-        private var mMaxStateNumber = 0
-
-        /**
-         * Current state-selected subway point
-         * */
-        private var mCurrentStateNumber = 0
-
-
-        private var mSpacing = 0.0f
-
-        private var mDescTopSpaceDecrementer = 0f
-        private var mDescTopSpaceIncrementer = 0f
-
-        private const val DEFAULT_TEXT_SIZE = 15f
-        private const val DEFAULT_STATE_SIZE = 25f
-
-        /**
-         * Paints for drawing
-         */
-        private var mBackgroundPaint: Paint? = null
-        private var mForegroundPaint: Paint? = null
-        private var mStateTextValuePaint: Paint? = null
-        private var mStateSubtextPaint: Paint? = null
-
-        private var mBackgroundColor = 0
-        private var mForegroundColor = 0
-        private var mStateTextValueColor = 0
-        private var mStateSubtextColor = 0
-
-        private var mDefaultTypefaceBold: Typeface? = null
-        private var mDefaultTypefaceNormal: Typeface? = null
-        private var mIsDescriptionMultiline = false
-        private var mMaxDescriptionLine = 0
-        private var mDescriptionLinesSpacing = 0.0f
-        private var STATE_DESCRIPTION_LINE_SEPARATOR = "\n"
-        private var mJustifyMultilineDescription = false
-        private var mEnableAllStatesCompleted = false
-        private var mCheckStateCompleted = false
     }
 }

@@ -14,6 +14,9 @@ class MainActivity : AppCompatActivity() {
     private val amtList: MutableList<String> = arrayListOf("$65k", "$65k", "$65k", "$65k", "$65k")
     private val descList: MutableList<String> = arrayListOf("05/07/2022", "05/07/2022", "05/07/2022", "05/07/2022", "05/07/2022")
 
+    private val amtList01: MutableList<String> = arrayListOf("$65.00k", "$65.00k", "$65.00k", "$65.00k", "$65.03k")
+    private val descList01: MutableList<String> = arrayListOf("05/07/2022", "05/07/2022", "05/07/2021", "05/08/2022", "05/07/2022")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,23 +25,25 @@ class MainActivity : AppCompatActivity() {
     stateProgressBar.setStateDescriptionData(descriptionData);*/
       //  val stateProgressBar =  findViewById<SurveyProgressBar>(R.id.progressIndicatorViewLayout)
 
-        val spb = findViewById<SubwayProgressCustomView>(R.id.progressIndicatorViewLayout01)
-        spb.setCustomViewTitle("this is custom title")
-        spb.setStateSubTextData(descList)
-        spb.setStateTextValueData(amtList)
-        spb.setProgressCurrentCompletedState(2)
+        val spb = findViewById<SurveyProgressBar>(R.id.progressIndicatorViewLayout02)
+       // spb.setCustomViewTitle("this is custom title")
+        spb.setStateTextRowOneData(amtList)
+        spb.setStateDescriptionData(descList)
+        spb.setCurrentStateNumber(2)
+       /* spb.setProgressCurrentCompletedState(2)
         spb.setStateSubTextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
         spb.setStateTextValueColor(getColor(R.color.black))
-        spb.setProgressbarSelectedColor(getColor(R.color.teal_700))
+        spb.setProgressbarSelectedColor(getColor(R.color.teal_700))*/
 
-        val spb02 = findViewById<SubwayProgressCustomView>(R.id.progressIndicatorViewLayout01)
-        spb02.setCustomViewTitle("**this is custom title 02**")
-        spb.setStateSubTextData(descList)
-        spb.setStateTextValueData(amtList)
-        spb.setProgressCurrentCompletedState(1)
+       /* val spb02 = (findViewById<SurveyProgressBar>(R.id.progressIndicatorViewLayout02))
+       // spb02.setCustomViewTitle("**this is custom title 02**")
+        spb02.setStateTextRowOneData(amtList)
+        spb02.setStateDescriptionData(descList)
+        spb02.setCurrentStateNumber(3)*/
+       /* spb02.setProgressCurrentCompletedState(4)
         spb.setStateSubTextColor(getColor(androidx.constraintlayout.widget.R.color.material_blue_grey_800))
         spb.setStateTextValueColor(getColor(R.color.black))
-        spb.setProgressbarSelectedColor(getColor(R.color.teal_700))
+        spb.setProgressbarSelectedColor(getColor(R.color.purple_500))*/
 
         //----------------
        /* stateProgressBar.setStateTextRowOneData(descList as ArrayList<String>)
